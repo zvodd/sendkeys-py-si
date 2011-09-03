@@ -1,0 +1,387 @@
+========
+SendKeys
+========
+
+:Version: 0.3
+:Date: 2003-06-14
+:Author: Ollie Rutherfurd <oliver@rutherfurd.net>
+:Homepage: http://www.rutherfurd.net/python/sendkeys/
+
+.. contents:: 
+
+Overview
+========
+
+SendKeys is a Python module for Windows (R) which can be used to send 
+one or more keystrokes or keystroke combinations to the active window.
+
+SendKeys exports 1 function, `SendKeys`, and 1 exception, `KeySequenceError`.
+
+SendKeys
+--------
+
+SendKeys(`keys`, `pause` = ``0.05``,  `with_spaces` = ``False``, 
+        `with_tabs` = ``False``, `with_newlines` = ``False``, 
+        `turn_off_numlock` = ``True``)
+
+Parameters
+~~~~~~~~~~
+
+`keys` : str
+    A string of keys.
+`pause` : float
+    The number of seconds to wait between sending each key
+    or key combination.
+`with_spaces` : bool
+    Whether to treat spaces as ``{SPACE}``. If ``False``, spaces are ignored.
+`with_tabs` : bool
+    Whether to treat tabs as ``{TAB}``. If ``False``, tabs are ignored.
+`with_newlines` : bool
+    Whether to treat newlines as ``{ENTER}``. If ``False``, newlines are ignored.
+`turn_off_numlock` : bool
+    Whether to turn off `NUMLOCK` before sending keys.
+
+KeySequenceError
+----------------
+
+`SendKeys` may throw `KeySequenceError` if an error is found when reading `keys`.
+**SendKeys reads all keys before pressing any, so if an error is found, no keys 
+will be pressed.**
+
+
+Key Syntax
+==========
+
+Modifiers
+---------
+
+`SendKeys` takes a string specifying one or more keys to press.  Most letter,
+number, and  punctuation keys are represented by the corresponding characters, 
+but the following keys and characters have special meaning:
+
+======= =======
+Key     Meaning
+======= =======
+``+``   `SHIFT`
+``^``   `CTRL`
+``%``   `ALT`
+======= =======
+
+To apply one or more modifiers to a key, place it in front of that key.  
+For example, here's how to get `CONTROL` + `a`::
+
+    ^a
+
+You may apply one or more modifiers to a group of keys, by putting the keys
+in parentheses.  For example, the following holds `SHIFT` down while all 3
+keys are pressed::
+
+    +(abc)
+
+To use one of the modifier keys, escape it by surrounding it with curly braces
+``{`` and ``}``.  For example, for a literal `%` instead of `ALT`::
+
+    {%}
+
+All of the following must be escaped within curly braces::
+
+    + ^ % ~ { } [ ] ( )
+
+**Each character must be escaped individually.** You may **not** do the 
+following:: 
+
+    {%%}
+
+.. Note:: When possible, `SendKeys` will automatically press `SHIFT` for you.
+          This easier for the programmer to read and write.  For example, if 
+          you wish `SendKeys` to type ``ABC!!``, rather than using one of the 
+          following::
+
+            +a+b+c+1+1
+            +(abc11)
+
+          you may use::
+
+            ABC!!
+
+
+Key Codes
+---------
+
+For keys which don't have a character representation, you must use a code.
+Here are the codes `SendKeys` recognizes:
+
+=================== =======================================
+Key                 Code
+=================== =======================================
+BACKSPACE           {BACKSPACE}, {BS}, or {BKSP}
+BREAK               {BREAK}
+CAPS LOCK           {CAPSLOCK} or {CAP}
+DEL or DELETE       {DELETE} or {DEL}
+DOWN ARROW          {DOWN}
+END                 {END}
+ENTER               {ENTER} or ``~``
+ESC                 {ESC}
+HELP                {HELP}
+HOME                {HOME}
+INS or INSERT       {INSERT} or {INS}
+LEFT ARROW          {LEFT}
+NUM LOCK            {NUMLOCK}
+PAGE DOWN           {PGDN}
+PAGE UP             {PGUP}
+PRINT SCREEN        {PRTSC}
+RIGHT ARROW         {RIGHT}
+SCROLL LOCK         {SCROLLLOCK}
+SPACE BAR           {PACE}
+TAB                 {TAB}
+UP ARROW            {UP}
+F1                  {F1}
+F2                  {F2}
+F3                  {F3}
+F4                  {F4}
+F5                  {F5}
+F6                  {F6}
+F7                  {F7}
+F8                  {F8}
+F9                  {F9}
+F10                 {F10}
+F11                 {F11}
+F12                 {F12}
+F13                 {F13}
+F14                 {F14}
+F15                 {F15}
+F16                 {F16}
+F17                 {F17}
+F18                 {F18}
+F19                 {F19}
+F20                 {F20}
+F21                 {F21}
+F22                 {F22}
+F23                 {F23}
+F24                 {F24}
+Keypad add          {ADD}
+Keypad subtract     {SUBTRACT}
+Keypad multiply     {MULTIPLY}
+Keypad divide       {DIVIDE}
+Left Windows(R)     {LWIN}
+Right Windows(R)    {RWIN}
+=================== =======================================
+
+Modifers maybe used with codes as well.  For example, for 
+`CONTROL` + `SHIFT` + `HOME`::
+
+    ^+{HOME}
+
+
+Repeating Keys
+--------------
+
+Here's the syntax for a repeating key::
+
+    {key count}
+
+Where ``key`` may be one of the `Key Codes`_ or a character and ``count`` 
+is the number of times to press the key.
+
+Examples:
+
+=============== ========================================
+Sequence        Equivlent
+=============== ========================================
+``{ENTER 2}``   ``{ENTER}{ENTER}``
+``{o 3}``       ``ooo``
+``^{A 2}``      ``^(AA)``
+=============== ========================================
+
+
+Examples
+========
+
+Hello World
+-----------
+
+In this example, `SendKeys` is used to type "Hello World!" in notepad.
+
+::
+
+    import SendKeys
+    SendKeys.SendKeys("""
+        {LWIN}
+        {PAUSE .25}
+        r
+        Notepad.exe{ENTER}
+        {PAUSE 1}
+        Hello{SPACE}World!
+        {PAUSE 1}
+        %{F4}
+        n
+    """)
+
+Tic-Tac-Toe
+-----------
+
+In this example, `SendKeys` is used to play a game of Tic-Tac-Toe in notepad.
+
+::
+
+    import os, sys, tempfile
+    from SendKeys import SendKeys
+    
+    try:
+        True
+    except NameError:
+        True,False = 1,0
+    
+    if __name__ == '__main__':
+    
+        # create file game will be saved to
+        filename = tempfile.mktemp('.txt')
+        print >> sys.stdout, "saving tic-tac-toe game to `%s`" % filename
+        f = open(filename,'w')
+        f.write('')
+        f.close()
+    
+        # open notepad
+        SendKeys("""{LWIN}rNotepad.exe{SPACE}"%(filename)s"{ENTER}{PAUSE 1}""" 
+            % {'filename': filename.replace('~','{~}')}, with_spaces=True)
+    
+        # draw board
+        SendKeys("""\
+       |   |   
+    ---+---+---
+       |   |   
+    ---+---+---
+       |   |  """.replace('+','{+}'),0.1, with_spaces=True, with_newlines=True)
+    
+       # play the game
+        SendKeys("""\
+        ^{HOME}
+        {DOWN 2}{RIGHT 5}+{RIGHT}{PAUSE 1}x
+        {LEFT 4}+{LEFT}+o
+        {UP 2}{RIGHT 3}+{RIGHT}x
+        {DOWN 4}+{LEFT}+(o)
+        {LEFT 4}+{LEFT}x
+        {RIGHT 7}{UP 4}+{RIGHT}O
+        {DOWN 4}+{LEFT}x
+        {UP 4}{LEFT 8}+{LEFT}+O
+        {RIGHT 7}{DOWN 2}+{RIGHT 1}x
+        ^s
+        """, 0.1)
+    
+        # read game saved from notepad
+        f = open(filename)
+        output = f.read()
+        f.close()
+    
+        assert output == """\
+     O | x | O 
+    ---+---+---
+     O | x | x 
+    ---+---+---
+     x | O | x"""
+        print 'Bad news: cat got the game'
+        print "Good news: that's what we expected, so the test passed"
+
+
+Command Line Usage
+==================
+
+SendKeys may also be used as a script::
+
+    C:\>python SendKeys.py --help
+    SendKeys.py [-h] [-d seconds] [-p seconds] [-f filename] or [string of keys]
+    
+        -dN    or --delay=N   : N is seconds before starting
+        -pN    or --pause=N   : N is seconds between each key
+        -fNAME or --file=NAME : NAME is filename containing keys to send
+        -h     or --help      : show help message
+
+
+Here's a silly example::
+
+    C:\>python SendKeys.py "echo{SPACE}'Hello{SPACE}World!'{ENTER}"
+    
+    C:\>echo 'Hello World!'
+    'Hello World!'
+    
+    C:\>
+
+
+Downloads
+=========
+
+The latest version is available at http://www.rutherfurd.net/python/sendkeys/.
+
+
+References
+==========
+
+This implementation of `SendKeys` is based on the 
+following sources:
+
+1. SendKeys, implemented in Pascal: 
+
+   http://www.ddj.com/documents/s=928/ddj9718j/9718j.htm
+
+2. SendKeys, implemented in Perl:
+
+   http://triumvir.org/prog/perl/guitest/
+
+3. SendKeys, Windows Scripting Host docs:
+
+   http://msdn.microsoft.com/library/default.asp?url=/library/en-us/script56/html/wsmthsendkeys.asp
+
+
+Known Issues
+============
+
+If `NUMLOCK` is on when `SendKeys` is called, then certain
+keystroke combinations don't seem to work.  For example,
+`C` + `SHIFT` + `LEFT` (or ``^+{LEFT}``) doesn't select text
+in notepad.  Instead, the cursor is just moved one to the 
+left as if `SHIFT` hadn't been pressed.
+
+As a work-around, when you call `SendKeys()`, by default it
+turns off `NUMLOCK`, if it's on.  You may disable this behavior
+by passing ``turn_off_numlock=False`` to `SendKeys()`.  If 
+`NUMLOCK` was turned off, it is turned back on before `SendKeys()`
+returns.
+
+
+License
+=======
+
+`Python License`__
+
+__ http://www.python.org/doc/Copyright.html
+
+
+Version History
+===============
+
+0.3 (2003-06-14)
+----------------
+
+* Compatible w/Python 2.1.
+
+0.2 (2003-06-06)
+----------------
+
+* Uses an extension, written in c, so `ctypes`_ (cool as it is)
+  is not required.
+
+0.1 (never released)
+--------------------
+
+* Used `ctypes`_ to make Windows API calls.
+
+.. _ctypes: http://starship.python.net/crew/theller/ctypes.html
+
+
+Feedback
+========
+
+Please send questions, comments, bug reports, etc... to Ollie Rutherfurd
+at oliver@rutherfurd.net.
+
+.. :lineSeparator=\r\n:maxLineLen=80:noTabs=true:tabSize=4:wrap=none:
